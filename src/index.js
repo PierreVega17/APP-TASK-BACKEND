@@ -70,9 +70,7 @@ io.on('connection', (socket) => {
 app.set('io', io); // Para acceder a io desde los controladores
 
 const PORT = process.env.PORT || 4000;
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true
-}).then(() => {
+mongoose.connect(process.env.MONGODB_URI).then(() => {
   server.listen(PORT, () => {
     console.log(`Servidor backend escuchando en puerto ${PORT}`);
   });
