@@ -31,7 +31,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/oauth', oauthRoutes);
 app.use('/api/boards', boardRoutes);
 app.use('/api/invite', inviteRoutes);
-app.use('/notifications', notificationRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.send('API de App-Task funcionando');
