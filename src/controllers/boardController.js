@@ -3,14 +3,23 @@ export const deleteBoard = async (req, res) => {
   try {
     const board = await Board.findById(id);
     if (!board) return res.status(404).json({ message: 'Tablero no encontrado' });
-    if (!board.owner.equals(req.user.id)) return res.status(403).json({ message: 'Solo el owner puede eliminar el tablero' });
-    // Eliminar tareas asociadas
-    await (await import('../models/Task.js')).default.deleteMany({ board: id });
-    await board.deleteOne();
-    // Emitir evento de actualización de tableros
+    // Si el usuario es owner, elimina el tablero para todos
+    if (board.owner.equals(req.user.id)) {
+      await (await import('../models/Task.js')).default.deleteMany({ board: id });
+      await board.deleteOne();
+      const io = req.app.get('io');
+      if (io) io.to(req.user.id.toString()).emit('boardsUpdated');
+      res.json({ message: 'Tablero eliminado para todos' });
+      return;
+    }
+    // Si es miembro, solo se elimina de su lista de miembros
+    const wasMember = board.members.some(m => m.equals(req.user.id));
+    if (!wasMember) return res.status(403).json({ message: 'No eres miembro de este tablero' });
+    board.members = board.members.filter(m => !m.equals(req.user.id));
+    await board.save();
     const io = req.app.get('io');
     if (io) io.to(req.user.id.toString()).emit('boardsUpdated');
-    res.json({ message: 'Tablero eliminado' });
+    res.json({ message: 'Tablero eliminado de tu lista' });
   } catch (err) {
     res.status(500).json({ message: 'Error al eliminar tablero', error: err.message });
   }
