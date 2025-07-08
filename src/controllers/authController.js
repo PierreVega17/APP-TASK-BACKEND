@@ -17,6 +17,9 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password, rememberMe } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Faltan credenciales' });
+  }
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Usuario o contraseña incorrectos' });
